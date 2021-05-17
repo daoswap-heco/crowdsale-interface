@@ -22,9 +22,9 @@
                       color="deep-purple accent-3"
                       group
                     >
-                      <v-btn value="1">1</v-btn>
-                      <v-btn value="2">2</v-btn>
-                      <v-btn value="3">3</v-btn>
+                      <v-btn value="1">1 USDT</v-btn>
+                      <v-btn value="2">2 USDT</v-btn>
+                      <v-btn value="3">3 USDT</v-btn>
                     </v-btn-toggle>
                   </v-col>
                 </v-row>
