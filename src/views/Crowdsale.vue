@@ -39,7 +39,7 @@
                   width="80%"
                   @click="
                     allowanceAmount &&
-                    allowanceAmount > parseInt(crowdsaleAmount)
+                    allowanceAmount >= parseInt(crowdsaleAmount)
                       ? handleCrowdsale()
                       : handleApprove()
                   "
@@ -47,7 +47,7 @@
                 >
                   {{
                     allowanceAmount &&
-                    allowanceAmount > parseInt(crowdsaleAmount)
+                    allowanceAmount >= parseInt(crowdsaleAmount)
                       ? $t("Crowdsale")
                       : $t("Approve")
                   }}
