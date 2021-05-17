@@ -132,6 +132,8 @@ const initStats = {
 export default {
   name: "Crowdsale",
   data: () => ({
+    // 通用授权额度
+    approveToContractAmount: 1000,
     // 默认认购额度
     crowdsaleAmount: "1",
     // 已授权额度
@@ -277,7 +279,7 @@ export default {
       getContractByABI("USDT", web3)
         .methods.approve(
           CrowdsaleByUSDTContractAddress,
-          parseInt(this.crowdsaleAmount) * Math.pow(10, 6)
+          this.approveToContractAmount * Math.pow(10, 6)
         )
         .send({ from: address })
         .then(() => {
