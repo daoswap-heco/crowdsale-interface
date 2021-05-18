@@ -233,6 +233,9 @@ export default {
           this.$t("CrowdsaleForm.The amount ranges from 150 to 1500 usdt")
         );
       }
+      if (crowdsaleAmountValue > this.state.assets.balance) {
+        errors.push(this.$t("CrowdsaleForm.The amount exceeds the balance"));
+      }
       return errors;
     }
   },
@@ -318,11 +321,13 @@ export default {
         const allowance = await contract.methods
           .allowance(address, CrowdsaleByUSDTContractAddress)
           .call();
-        this.allowanceAmount = parseInt(allowance) / Math.pow(10, 6);
+        this.allowanceAmount = formatAmountForString(allowance, 6);
+        const balance = await contract.methods.balanceOf(address).call();
         const assetsState = {
           fetching: false,
           assets: {
-            allowanceAmount: this.allowanceAmount
+            allowanceAmount: this.allowanceAmount,
+            balance: formatAmountForString(balance, 6)
           }
         };
         this.state = Object.assign(this.state, assetsState);

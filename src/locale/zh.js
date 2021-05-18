@@ -16,6 +16,7 @@ export default {
   "Crowdsale Success": "认购成功",
   CrowdsaleForm: {
     "Crowdsal Amount": "认购额度",
+    "The amount exceeds the balance": "金额超过账户余额",
     "The amount ranges from 150 to 1500 usdt":
       "认购额度范围为 150 ～ 1500 USDT",
     "Invalid amount": "不可用的数值",

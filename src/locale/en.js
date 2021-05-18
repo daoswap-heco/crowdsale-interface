@@ -16,6 +16,7 @@ export default {
   "Crowdsale Success": "Crowdsale Success",
   CrowdsaleForm: {
     "Crowdsale Amount": "Crowdsale Amount",
+    "The amount exceeds the balance": "The amount exceeds the balance",
     "The amount ranges from 150 to 1500 usdt":
       "The amount ranges from 150 to 1500 USDT",
     "Invalid amount": "Invalid amount",
