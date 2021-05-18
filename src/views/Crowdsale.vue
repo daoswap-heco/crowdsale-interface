@@ -199,7 +199,7 @@ export default {
     // 众筹信息
     dataForCrowdsale: {
       weiRaised: null,
-      soldNumber: null,
+      soldNumber: 0,
       totalShare: 1000,
       joinedAmount: 0
     },
@@ -294,8 +294,9 @@ export default {
         const contract = await getContract("Crowdsale", web3);
         const weiRaised = await contract.methods.weiRaised().call();
         this.dataForCrowdsale.weiRaised = formatAmountForString(weiRaised);
-        const soldNumber = await contract.methods.soldNumber().call();
-        this.dataForCrowdsale.soldNumber = formatAmountForString(soldNumber);
+        this.dataForCrowdsale.soldNumber = await contract.methods
+          .soldNumber()
+          .call();
         const joinedAmount = await contract.methods.joined(address).call();
         this.dataForCrowdsale.joinedAmount = formatAmountForString(
           joinedAmount
