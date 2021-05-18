@@ -2,7 +2,7 @@ import supportedChains from "./chain";
 
 export function getChainData(chainId) {
   const chainData = supportedChains.filter(
-    (chain) => chain.chain_id === chainId
+    chain => chain.chain_id === chainId
   )[0];
 
   if (!chainData) {
@@ -20,7 +20,7 @@ export function getChainData(chainId) {
 
     return {
       ...chainData,
-      rpc_url: rpcUrl,
+      rpc_url: rpcUrl
     };
   }
 

@@ -12,8 +12,8 @@ const supportedChains = [
       name: "Huobi ECO Chain",
       decimals: "18",
       contractAddress: "",
-      balance: "",
-    },
+      balance: ""
+    }
   },
   {
     name: "HECO Testnet",
@@ -28,9 +28,9 @@ const supportedChains = [
       name: "Huobi ECO Chain",
       decimals: "18",
       contractAddress: "",
-      balance: "",
-    },
-  },
+      balance: ""
+    }
+  }
 ];
 
 export default supportedChains;

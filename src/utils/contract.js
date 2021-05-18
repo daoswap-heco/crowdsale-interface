@@ -3,18 +3,18 @@ import {
   CrowdsaleByUSDT_CONTRACT,
   CrowdsaleByUSDTContractAddress,
   ERC20_ABI,
-  USDTAddress,
+  USDTAddress
 } from "../constants";
 
 const CONTRACTS = {
   Crowdsale: {
     contractJson: CrowdsaleByUSDT_CONTRACT,
-    address: CrowdsaleByUSDTContractAddress,
+    address: CrowdsaleByUSDTContractAddress
   },
   USDT: {
     contractJson: ERC20_ABI,
-    address: USDTAddress,
-  },
+    address: USDTAddress
+  }
 };
 
 export const getContract = (name, web3) => {

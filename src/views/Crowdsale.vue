@@ -3,36 +3,61 @@
     <v-container v-if="state.connected" class="fill-height">
       <v-row justify="center">
         <v-col md="6">
-          <v-card class="fill-width">
-            <v-card outlined>
+          <!-- 认购数据显示 -->
+          <v-card justify="center" class="fill-width">
+            <v-card-title>
+              <span class="title font-weight-light">
+                {{ $t("Crowdsale Progress") }}
+              </span>
+            </v-card-title>
+            <v-divider></v-divider>
+            <v-card-text>
+              <v-row align="center">
+                <v-col class="body-1" cols="12">
+                  <p>
+                    {{ $t("Crowdsaled Amount") }}：
+                    {{ dataForCrowdsale.weiRaised }} USDT
+                  </p>
+                </v-col>
+                <v-col class="body-1" cols="12">
+                  <p>
+                    {{ $t("Crowdsale Remaining") }}：
+                    {{ dataForCrowdsale.soldNumber }} /
+                    {{ dataForCrowdsale.totalShare }}
+                  </p>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+          <!-- 认购操作 -->
+          <v-card class="fill-width mt-10">
+            <v-card outlined v-if="dataForCrowdsale.joinedAmount <= 0">
               <v-card-title>
                 <v-avatar size="24" class="mr-2">
                   <img :src="require('@/assets/logo.png')" alt="DOI" />
                 </v-avatar>
                 <span class="title font-weight-light">
-                  {{ $t("Select Crowdsale Amount") }}
+                  {{ $t("Input Crowdsale Amount") }}
                 </span>
               </v-card-title>
               <v-card-text>
-                <v-row align="center">
-                  <v-col class="display-3" cols="12">
-                    <v-btn-toggle
-                      v-model="crowdsaleAmount"
-                      tile
-                      color="deep-purple accent-3"
-                      group
-                    >
-                      <v-btn value="1">1 USDT</v-btn>
-                      <v-btn value="2">2 USDT</v-btn>
-                      <v-btn value="3">3 USDT</v-btn>
-                    </v-btn-toggle>
-                  </v-col>
-                </v-row>
+                <v-text-field
+                  v-model="crowdsaleAmount"
+                  :error-messages="crowdsaleAmountErrors"
+                  required
+                  @input="$v.crowdsaleAmount.$touch()"
+                  @blur="$v.crowdsaleAmount.$touch()"
+                  autofocus
+                >
+                  <span slot="append">
+                    USDT
+                  </span>
+                </v-text-field>
               </v-card-text>
-              <v-divider v-if="crowdsaleAmount"></v-divider>
+              <v-divider v-if="crowdsaleAmountErrors.length <= 0"></v-divider>
               <v-card-actions class="justify-center">
                 <v-btn
-                  v-if="crowdsaleAmount"
+                  v-if="crowdsaleAmountErrors.length <= 0"
                   large
                   color="primary"
                   dark
@@ -54,7 +79,26 @@
                 </v-btn>
               </v-card-actions>
             </v-card>
+            <v-card outlined v-if="dataForCrowdsale.joinedAmount > 0">
+              <v-card-title>
+                <v-avatar size="24" class="mr-2">
+                  <img :src="require('@/assets/logo.png')" alt="DOI" />
+                </v-avatar>
+                <span class="title font-weight-light">
+                  {{ $t("Person Crowdsaled Amount") }}
+                </span>
+              </v-card-title>
+              <v-card-text>
+                <v-row align="center">
+                  <v-col class="display-3" cols="12">
+                    {{ dataForCrowdsale.joinedAmount }}
+                    <span class="display-1">USDT</span>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
           </v-card>
+          <!-- 当前钱包账号 -->
           <v-card justify="center" class="fill-width mt-10">
             <v-card-title>
               <span class="title font-weight-light">
@@ -82,9 +126,19 @@
               </v-btn>
             </v-card-actions>
           </v-card>
+          <!-- 遮罩层 -->
           <v-overlay z-index="9999" opacity="0.7" :value="state.fetching">
             <v-progress-circular indeterminate size="64"></v-progress-circular>
           </v-overlay>
+          <!-- 提示层 -->
+          <v-snackbar
+            v-model="operationResult.snackbar"
+            color="success"
+            centered
+            timeout="4000"
+          >
+            {{ $t(operationResult.text) }}
+          </v-snackbar>
         </v-col>
       </v-row>
     </v-container>
@@ -106,16 +160,22 @@
 </template>
 
 <script>
+import { validationMixin } from "vuelidate";
+import { required, decimal } from "vuelidate/lib/validators";
 import clip from "@/utils/clipboard";
 import Web3 from "web3";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { getChainData } from "@/utils/utilities";
-import { getContract, getContractByABI } from "@/utils/contract";
+import {
+  getContract,
+  getContractByABI,
+  formatAmountForString
+} from "@/utils/contract";
 import {
   CHAIN_ID,
   NETWORK_ID,
-  CrowdsaleByUSDTContractAddress,
+  CrowdsaleByUSDTContractAddress
 } from "@/constants";
 
 const initStats = {
@@ -126,22 +186,56 @@ const initStats = {
   connected: false,
   chainId: Number(CHAIN_ID),
   networkId: Number(NETWORK_ID),
-  assets: [],
+  assets: []
 };
 
 export default {
   name: "Crowdsale",
+  mixins: [validationMixin],
+  validations: {
+    crowdsaleAmount: { required, decimal }
+  },
   data: () => ({
+    // 众筹信息
+    dataForCrowdsale: {
+      weiRaised: null,
+      soldNumber: null,
+      totalShare: 1000,
+      joinedAmount: 0
+    },
     // 通用授权额度
-    approveToContractAmount: 1000,
+    approveToContractAmount: 1500,
     // 默认认购额度
-    crowdsaleAmount: "1",
+    crowdsaleAmount: 150,
     // 已授权额度
     allowanceAmount: null,
-    // 奖励参数
+    // 初始参数
     state: initStats,
     web3Modal: undefined,
+    // 提示框
+    operationResult: {
+      snackbar: false,
+      text: `Hello`
+    }
   }),
+  computed: {
+    crowdsaleAmountErrors() {
+      const errors = [];
+      if (!this.$v.crowdsaleAmount.$dirty) return errors;
+      !this.$v.crowdsaleAmount.decimal &&
+        errors.push(this.$t("CrowdsaleForm.Invalid amount"));
+      !this.$v.crowdsaleAmount.required &&
+        errors.push(this.$t("CrowdsaleForm.The amount is required"));
+
+      const crowdsaleAmountValue = parseFloat(this.$v.crowdsaleAmount.$model);
+      if (crowdsaleAmountValue < 150 || crowdsaleAmountValue > 1500) {
+        errors.push(
+          this.$t("CrowdsaleForm.The amount ranges from 150 to 1500 usdt")
+        );
+      }
+      return errors;
+    }
+  },
   methods: {
     // 复制地址
     handleCopy(text, event) {
@@ -153,14 +247,14 @@ export default {
         return;
       }
       provider.on("close", () => this.resetApp());
-      provider.on("accountsChanged", async (accounts) => {
+      provider.on("accountsChanged", async accounts => {
         const addressState = {
-          address: Web3.utils.toChecksumAddress(accounts[0]),
+          address: Web3.utils.toChecksumAddress(accounts[0])
         };
         this.state = Object.assign(this.state, addressState);
         await this.getAccountAssets();
       });
-      provider.on("chainChanged", async (chainId) => {
+      provider.on("chainChanged", async chainId => {
         const { web3 } = this.state;
         const networkId = await web3.eth.net.getId();
         const chainState = { chainId: chainId, networkId: networkId };
@@ -168,7 +262,7 @@ export default {
         await this.getAccountAssets();
       });
 
-      provider.on("networkChanged", async (networkId) => {
+      provider.on("networkChanged", async networkId => {
         const { web3 } = this.state;
         const chainId = await web3.eth.chainId();
         const networkState = { chainId: chainId, networkId: networkId };
@@ -184,10 +278,36 @@ export default {
     getProviderOptions() {
       const providerOptions = {
         walletconnect: {
-          package: WalletConnectProvider,
-        },
+          package: WalletConnectProvider
+        }
       };
       return providerOptions;
+    },
+    // 获取众筹信息
+    async getCrowdsaleInfo() {
+      const { web3, address } = this.state;
+      this.state.fetching = true;
+      try {
+        const contract = await getContract("Crowdsale", web3);
+        const weiRaised = await contract.methods.weiRaised().call();
+        this.dataForCrowdsale.weiRaised = formatAmountForString(weiRaised);
+        const soldNumber = await contract.methods.soldNumber().call();
+        this.dataForCrowdsale.soldNumber = formatAmountForString(soldNumber);
+        const joinedAmount = await contract.methods.joined(address).call();
+        this.dataForCrowdsale.joinedAmount = formatAmountForString(
+          joinedAmount
+        );
+        const assetsState = {
+          fetching: false
+        };
+        this.state = Object.assign(this.state, assetsState);
+      } catch (error) {
+        const errorState = {
+          fetching: false,
+          connected: false
+        };
+        this.state = Object.assign(this.state, errorState);
+      }
     },
     // 获取账号信息
     async getAccountAssets() {
@@ -202,14 +322,15 @@ export default {
         const assetsState = {
           fetching: false,
           assets: {
-            allowanceAmount: this.allowanceAmount,
-          },
+            allowanceAmount: this.allowanceAmount
+          }
         };
         this.state = Object.assign(this.state, assetsState);
+        await this.getCrowdsaleInfo();
       } catch (error) {
         const errorState = {
           fetching: false,
-          connected: false,
+          connected: false
         };
         this.state = Object.assign(this.state, errorState);
       }
@@ -223,9 +344,9 @@ export default {
           {
             name: "chainId",
             call: "eth_chainId",
-            outputFormatter: web3.utils.hexToNumber,
-          },
-        ],
+            outputFormatter: web3.utils.hexToNumber
+          }
+        ]
       });
 
       return web3;
@@ -246,7 +367,7 @@ export default {
         connected: true,
         address,
         chainId,
-        networkId,
+        networkId
       };
       this.state = Object.assign(this.state, connectedState);
       await this.getAccountAssets();
@@ -266,7 +387,7 @@ export default {
         connected: false,
         chainId: 1,
         networkId: 1,
-        assets: [],
+        assets: []
       };
       this.state = nullStats;
     },
@@ -274,7 +395,6 @@ export default {
     handleApprove() {
       const { web3, address } = this.state;
       this.state.fetching = true;
-      this.dialog = false;
       // 执行合约
       getContractByABI("USDT", web3)
         .methods.approve(
@@ -284,9 +404,11 @@ export default {
         .send({ from: address })
         .then(() => {
           this.state.fetching = false;
+          this.operationResult.snackbar = true;
+          this.operationResult.text = "Approve Success";
           this.getAccountAssets();
         })
-        .catch((e) => {
+        .catch(e => {
           this.state.fetching = false;
           console.info(e);
         });
@@ -295,39 +417,40 @@ export default {
     handleCrowdsale() {
       const { web3, address } = this.state;
       this.state.fetching = true;
-      this.dialog = false;
       // 执行合约
       getContract("Crowdsale", web3)
-        .methods.buyTokens(parseInt(this.crowdsaleAmount) * Math.pow(10, 6))
+        .methods.buyTokens(this.crowdsaleAmount * Math.pow(10, 6))
         .send({ from: address })
         .then(() => {
           this.state.fetching = false;
+          this.operationResult.snackbar = true;
+          this.operationResult.text = "Crowdsale Success";
           this.getAccountAssets();
         })
-        .catch((e) => {
+        .catch(e => {
           this.state.fetching = false;
           console.info(e);
         });
-    },
+    }
   },
   mounted() {
     this.web3Modal = new Web3Modal({
       network: this.getNetwork(),
       cacheProvider: true,
-      providerOptions: this.getProviderOptions(),
+      providerOptions: this.getProviderOptions()
     });
     if (!this.web3Modal.cachedProvider) {
       this.onConnect();
     }
   },
   watch: {
-    web3Modal: function (web3) {
+    web3Modal: function(web3) {
       if (web3 && web3.currentProvider && web3.currentProvider.close) {
         this.state.connected = false;
       } else {
         this.onConnect();
       }
-    },
-  },
+    }
+  }
 };
 </script>

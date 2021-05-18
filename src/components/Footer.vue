@@ -22,10 +22,6 @@
         </v-btn>
       </v-card-text>
 
-      <v-card-text class="white--text pt-0">
-        {{ $t("The page of crowdsale") }}
-      </v-card-text>
-
       <v-divider></v-divider>
 
       <v-card-text class="white--text">
@@ -43,14 +39,14 @@ export default {
       {
         title: "Daoswap",
         icon: "mdi-home",
-        url: "https://app.daoswap.global",
+        url: "https://app.daoswap.global"
       },
       {
         title: "Twitter",
         icon: "mdi-twitter",
-        url: "https://twitter.com/SwapDao",
-      },
-    ],
-  }),
+        url: "https://twitter.com/SwapDao"
+      }
+    ]
+  })
 };
 </script>

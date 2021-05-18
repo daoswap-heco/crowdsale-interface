@@ -2,7 +2,7 @@ import Clipboard from "clipboard";
 
 export default function handleClipboard(text, event) {
   const clipboard = new Clipboard(event.target, {
-    text: () => text,
+    text: () => text
   });
   clipboard.on("success", () => {
     clipboard.destroy();

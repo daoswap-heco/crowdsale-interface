@@ -2,7 +2,7 @@ import { init, getAccount, setAccount, toChecksumAddress } from "@/utils/web3";
 
 const state = {
   web3: init(),
-  currentAccount: getAccount(),
+  currentAccount: getAccount()
 };
 
 const mutations = {
@@ -11,7 +11,7 @@ const mutations = {
   },
   SET_CURRENTACCOUNT: (state, account) => {
     state.currentAccount = toChecksumAddress(account);
-  },
+  }
 };
 
 const actions = {
@@ -23,12 +23,12 @@ const actions = {
   changeCurrentAccount({ commit }, account) {
     setAccount(account);
     commit("SET_CURRENTACCOUNT", account);
-  },
+  }
 };
 
 export default {
   namespaced: true,
   state,
   mutations,
-  actions,
+  actions
 };

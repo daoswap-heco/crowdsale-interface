@@ -12,13 +12,6 @@
       <span class="text-md-h5 text-sm-body-2">Daoswap</span>
     </div>
     <v-spacer></v-spacer>
-    <v-btn
-      color="pink accent-3"
-      href="https://app.daoswap.global"
-      target="_blank"
-      >Daoswap APP</v-btn
-    >
-    <v-spacer></v-spacer>
     <v-menu offset-y>
       <template v-slot:activator="{ on, attrs }">
         <v-btn text v-bind="attrs" v-on="on">
@@ -47,19 +40,19 @@ export default {
     localeList: [
       {
         locale: "zh",
-        title: "中文",
+        title: "中文"
       },
       {
         locale: "en",
-        title: "English",
-      },
-    ],
+        title: "English"
+      }
+    ]
   }),
   methods: {
     changeLang(locale) {
       this.$i18n.locale = locale;
-    },
-  },
+    }
+  }
   // computed: {
   //   ...mapState({
   //     web3: (state) => state.web3.web3,

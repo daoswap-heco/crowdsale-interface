@@ -18,10 +18,10 @@ export default {
   name: "App",
   components: {
     Header,
-    Footer,
+    Footer
   },
   data: () => ({
     //
-  }),
+  })
 };
 </script>
