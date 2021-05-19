@@ -16,7 +16,8 @@
                 <v-col class="body-1" cols="12">
                   <p>
                     {{ $t("Crowdsaled Amount") }}：
-                    {{ dataForCrowdsale.weiRaised }} USDT
+                    {{ dataForCrowdsale.weiRaised }}
+                    {{ dataForCrowdsale.tokenSymbol }}
                   </p>
                 </v-col>
                 <v-col class="body-1" cols="12">
@@ -54,7 +55,7 @@
                   autofocus
                 >
                   <span slot="append">
-                    USDT
+                    {{ dataForCrowdsale.tokenSymbol }}
                   </span>
                 </v-text-field>
               </v-card-text>
@@ -109,7 +110,9 @@
                 <v-row align="center">
                   <v-col class="display-3" cols="12">
                     {{ dataForCrowdsale.joinedAmount }}
-                    <span class="display-1">USDT</span>
+                    <span class="display-1">
+                      {{ dataForCrowdsale.tokenSymbol }}
+                    </span>
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -215,7 +218,8 @@ export default {
   data: () => ({
     // 众筹信息
     dataForCrowdsale: {
-      weiRaised: null,
+      tokenSymbol: "USDT",
+      weiRaised: 0,
       soldNumber: 0,
       totalNumber: 1000,
       joinedAmount: 0,
@@ -361,13 +365,13 @@ export default {
         const allowance = await contract.methods
           .allowance(address, CrowdsaleByUSDTContractAddress)
           .call();
-        this.allowanceAmount = formatAmountForString(allowance, 6);
+        this.allowanceAmount = formatAmountForString(allowance);
         const balance = await contract.methods.balanceOf(address).call();
         const assetsState = {
           fetching: false,
           assets: {
             allowanceAmount: this.allowanceAmount,
-            balance: formatAmountForString(balance, 6)
+            balance: formatAmountForString(balance)
           }
         };
         this.state = Object.assign(this.state, assetsState);
@@ -444,7 +448,7 @@ export default {
       getContractByABI("USDT", web3)
         .methods.approve(
           CrowdsaleByUSDTContractAddress,
-          this.approveToContractAmount * Math.pow(10, 6)
+          web3.utils.toWei(this.approveToContractAmount.toString(), "ether")
         )
         .send({ from: address })
         .then(() => {
@@ -464,7 +468,9 @@ export default {
       this.state.fetching = true;
       // 执行合约
       getContract("Crowdsale", web3)
-        .methods.buyTokens(this.crowdsaleAmount * Math.pow(10, 6))
+        .methods.buyTokens(
+          web3.utils.toWei(this.crowdsaleAmount.toString(), "ether")
+        )
         .send({ from: address })
         .then(() => {
           this.state.fetching = false;
