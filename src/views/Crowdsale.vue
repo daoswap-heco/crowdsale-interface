@@ -40,7 +40,11 @@
                   {{ $t("Input Crowdsale Amount") }}
                 </span>
               </v-card-title>
-              <v-card-text>
+              <v-card-text
+                v-if="
+                  dataForCrowdsale.soldNumber < dataForCrowdsale.totalNumber
+                "
+              >
                 <v-text-field
                   v-model="crowdsaleAmount"
                   :error-messages="crowdsaleAmountErrors"
@@ -54,8 +58,21 @@
                   </span>
                 </v-text-field>
               </v-card-text>
-              <v-divider v-if="crowdsaleAmountErrors.length <= 0"></v-divider>
-              <v-card-actions class="justify-center">
+              <v-card-text v-else>
+                {{ $t("Crowdfunding is over") }}
+              </v-card-text>
+              <v-divider
+                v-if="
+                  crowdsaleAmountErrors.length <= 0 &&
+                    dataForCrowdsale.soldNumber < dataForCrowdsale.totalNumber
+                "
+              ></v-divider>
+              <v-card-actions
+                class="justify-center"
+                v-if="
+                  dataForCrowdsale.soldNumber < dataForCrowdsale.totalNumber
+                "
+              >
                 <v-btn
                   v-if="crowdsaleAmountErrors.length <= 0"
                   large

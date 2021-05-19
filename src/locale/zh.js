@@ -26,5 +26,6 @@ export default {
     "The amount is required": "请填写认购额度"
   },
   "Person Crowdsaled Amount": "您已认购额度",
+  "Crowdfunding is over": "认购已结束",
   "The page of crowdsale": "这是一个认购页面"
 };

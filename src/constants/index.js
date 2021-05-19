@@ -4,7 +4,7 @@ import ERC20_ABI from "./contracts/erc20-abi.json";
 export { CrowdsaleByUSDT_CONTRACT, ERC20_ABI };
 
 export const CrowdsaleByUSDTContractAddress =
-  "0xE729c32C8E986f8D652a6bdd7BDD7d0bbb5A5cd3";
+  "0x136d5E158802B5835123e3bA11dD84E5d203F246";
 
 export const USDTAddress = "0x04F535663110A392A6504839BEeD34E019FdB4E0";
 

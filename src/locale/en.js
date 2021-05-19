@@ -26,5 +26,6 @@ export default {
     "The amount is required": "The amount is required"
   },
   "Person Crowdsaled Amount": "Person Crowdsaled Amount",
+  "Crowdfunding is over": "Crowdfunding is over",
   "The page of crowdsale": "The page of crowdsale."
 };
