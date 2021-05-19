@@ -14,12 +14,15 @@ export default {
   "Crowdsale Remaining": "Crowdsale Remaining",
   "Approve Success": "Approve Success",
   "Crowdsale Success": "Crowdsale Success",
+  to: "to",
+  usdt: "USDT",
   CrowdsaleForm: {
     "Crowdsale Amount": "Crowdsale Amount",
     "The amount exceeds the balance": "The amount exceeds the balance",
+    "The amount ranges from": "The amount ranges from",
     "The amount ranges from 150 to 1500 usdt":
       "The amount ranges from 150 to 1500 USDT",
-    "Invalid amount": "Invalid amount",
+    "Invalid amount": "Invalid amount，must be an integer",
     "The amount is required": "The amount is required"
   },
   "Person Crowdsaled Amount": "Person Crowdsaled Amount",

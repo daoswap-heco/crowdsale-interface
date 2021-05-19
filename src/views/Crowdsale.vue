@@ -23,7 +23,7 @@
                   <p>
                     {{ $t("Crowdsale Remaining") }}：
                     {{ dataForCrowdsale.soldNumber }} /
-                    {{ dataForCrowdsale.totalShare }}
+                    {{ dataForCrowdsale.totalNumber }}
                   </p>
                 </v-col>
               </v-row>
@@ -161,7 +161,7 @@
 
 <script>
 import { validationMixin } from "vuelidate";
-import { required, decimal } from "vuelidate/lib/validators";
+import { required, integer } from "vuelidate/lib/validators";
 import clip from "@/utils/clipboard";
 import Web3 from "web3";
 import Web3Modal from "web3modal";
@@ -193,15 +193,17 @@ export default {
   name: "Crowdsale",
   mixins: [validationMixin],
   validations: {
-    crowdsaleAmount: { required, decimal }
+    crowdsaleAmount: { required, integer }
   },
   data: () => ({
     // 众筹信息
     dataForCrowdsale: {
       weiRaised: null,
       soldNumber: 0,
-      totalShare: 1000,
-      joinedAmount: 0
+      totalNumber: 1000,
+      joinedAmount: 0,
+      minCrowdsaleAmount: 150,
+      maxCrowdsaleAmount: 1500
     },
     // 通用授权额度
     approveToContractAmount: 1500,
@@ -222,15 +224,25 @@ export default {
     crowdsaleAmountErrors() {
       const errors = [];
       if (!this.$v.crowdsaleAmount.$dirty) return errors;
-      !this.$v.crowdsaleAmount.decimal &&
+      !this.$v.crowdsaleAmount.integer &&
         errors.push(this.$t("CrowdsaleForm.Invalid amount"));
       !this.$v.crowdsaleAmount.required &&
         errors.push(this.$t("CrowdsaleForm.The amount is required"));
 
       const crowdsaleAmountValue = parseFloat(this.$v.crowdsaleAmount.$model);
-      if (crowdsaleAmountValue < 150 || crowdsaleAmountValue > 1500) {
+      if (
+        crowdsaleAmountValue < this.dataForCrowdsale.minCrowdsaleAmount ||
+        crowdsaleAmountValue > this.dataForCrowdsale.maxCrowdsaleAmount
+      ) {
         errors.push(
-          this.$t("CrowdsaleForm.The amount ranges from 150 to 1500 usdt")
+          this.$t("CrowdsaleForm.The amount ranges from") +
+            " " +
+            this.dataForCrowdsale.minCrowdsaleAmount +
+            this.$t("to") +
+            " " +
+            this.dataForCrowdsale.maxCrowdsaleAmount +
+            " " +
+            this.$t("usdt")
         );
       }
       if (crowdsaleAmountValue > this.state.assets.balance) {
@@ -297,10 +309,19 @@ export default {
         this.dataForCrowdsale.soldNumber = await contract.methods
           .soldNumber()
           .call();
+        this.dataForCrowdsale.totalNumber = await contract.methods
+          .totalNumber()
+          .call();
         const joinedAmount = await contract.methods.joined(address).call();
         this.dataForCrowdsale.joinedAmount = formatAmountForString(
           joinedAmount
         );
+        this.dataForCrowdsale.minCrowdsaleAmount = await contract.methods
+          .minCrowdsaleAmount()
+          .call();
+        this.dataForCrowdsale.maxCrowdsaleAmount = await contract.methods
+          .maxCrowdsaleAmount()
+          .call();
         const assetsState = {
           fetching: false
         };
