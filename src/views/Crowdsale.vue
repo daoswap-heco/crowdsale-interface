@@ -322,6 +322,7 @@ export default {
         this.dataForCrowdsale.maxCrowdsaleAmount = await contract.methods
           .maxCrowdsaleAmount()
           .call();
+        this.crowdsaleAmount = this.dataForCrowdsale.minCrowdsaleAmount;
         const assetsState = {
           fetching: false
         };
